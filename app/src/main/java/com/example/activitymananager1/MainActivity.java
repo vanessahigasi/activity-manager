@@ -1,15 +1,21 @@
 package com.example.activitymananager1;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private TextView tvName;
+    private TextView tvName; //text view
+    private EditText etInput; //edit text
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,11 +28,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button btnLoad = findViewById(R.id.activity_main__btn__load);
         btnLoad.setOnClickListener(this);
 
+        Button btnLaunch = findViewById(R.id.activity_name_btn__launch__activity);
+        btnLaunch.setOnClickListener(this);
+
         TextView tvTitle = findViewById(R.id.activity_main__tv__title);
         tvTitle.setOnClickListener(this);
 
         tvName = findViewById(R.id.activity_main__tv___name);
         tvName.setOnClickListener(this);
+
+        etInput = findViewById(R.id.activity_main__et__input);
+
     }
 
     @Override
@@ -66,14 +78,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(View v) { //when a lot of repetitions
 
         String message = null;
 
         switch (v.getId()) {
             case R.id.activity_main__btn__load:
                 message = "button clicked";
-                tvName.setText("HelloWorld");
+                tvName.setText(etInput.getText().toString());
                 tvName.setBackgroundColor(getResources().getColor(R.color.myFavColor));
                 break;
             case R.id.activity_main__tv__title:
@@ -82,6 +94,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case  R.id.activity_main__tv___name:
                 message = "";
                 break;
+            case R.id.activity_name_btn__launch__activity:
+                Intent intent = new Intent(this, DetailActivity.class);
+                intent.putExtra("data from main-activity", tvName.getText());
+
+                startActivityForResult(intent,101);
+
+                //startActivity(intent);
+                break;
+
             default:
         }
 
@@ -89,4 +110,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         }
     }
-}
+
+    @Override //rotate the screen to save the information on screen on a bundle (parcelable information)
+    protected void onSaveInstanceState(Bundle outState) { //Bundle is a map between a string and parcelable value (primitive value)
+        super.onSaveInstanceState(outState);
+        outState.putString("data from edit-text", etInput.getText().toString());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle inState) { //outState = savedInstanceState
+        super.onRestoreInstanceState(inState);
+        tvName.setText(inState.getString("data from edit-text"));
+        tvName.setBackgroundColor(getResources().getColor(R.color.myFavColor));
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 101 && resultCode == Activity.RESULT_OK && data != null) {
+
+        String returnData = data.getStringExtra("return_data");
+        Toast.makeText(this,
+                "Data returned: " + returnData,
+        Toast.LENGTH_SHORT).show();
+    }
+}}
